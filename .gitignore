@@ -1,0 +1,5 @@
+*.db
+*.depend
+*.cbp
+*.layout
+*.log
