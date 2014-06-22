@@ -133,6 +133,14 @@ extern short loadTeams(char const * pFileNameOfFileToLoad)
 {
     TTeam tempTeam;
 
+    tempTeam.playerCount           = 0;
+    tempTeam.numberOfMatchesWon    = 0;
+    tempTeam.numberOfMatchesTied   = 0;
+    tempTeam.numberOfMatchesLost   = 0;
+    tempTeam.numberOfGoalsScored   = 0;
+    tempTeam.numberOfGoalsLetIn    = 0;
+    tempTeam.numberOfPoints        = 0;
+
 //    tempTeam.nameOfTeam     = calloc(MAXNAMELENGTH + 1, sizeof(char));
 //    tempTeam.nameOfCoach    = calloc(MAXNAMELENGTH + 1, sizeof(char));
 
@@ -212,8 +220,6 @@ extern short loadOneTeam(FILE *const pFileHandleDataBase, FILE *const pFileHandl
 
     pTeamToLoad->nameOfTeam     = calloc(MAXNAMELENGTH + 1, sizeof(char));
     pTeamToLoad->nameOfCoach    = calloc(MAXNAMELENGTH + 1, sizeof(char));
-
-    pTeamToLoad->playerCount = 0;
 
     do
     {
@@ -334,7 +340,7 @@ static short loadOnePlayer(FILE *const pFileHandleDataBase, FILE *const pFileHan
     char readBuffer[100];
 
     pPlayerToLoad->nameOfPlayer    = calloc(MAXNAMELENGTH + 1, sizeof(char));
-    pPlayerToLoad->birthday        = calloc(1, sizeof(TDate));
+    pPlayerToLoad->birthday        = calloc(1 + 1, sizeof(TDate));
 
     if(fgets(readBuffer, sizeof(readBuffer), pFileHandleDataBase) == NULL)
     {
