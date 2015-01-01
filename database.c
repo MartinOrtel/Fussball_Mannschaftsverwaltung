@@ -101,8 +101,8 @@ static short savePlayers(FILE *const pFileHandleDataBase, const TPlayer * pPlaye
     unsigned short i;
 
     for(i = 0; i < playerCount; i++)
-            if(saveOnePlayer(pFileHandleDataBase, pPlayersToSave[i]) == 0)
-                return 0;
+        if(saveOnePlayer(pFileHandleDataBase, pPlayersToSave[i]) == 0)
+            return 0;
 
     return 1;
 }
@@ -133,14 +133,14 @@ extern short loadTeams(char const * pFileNameOfFileToLoad)
 {
     TTeam tempTeam;
 
-    tempTeam.playerCount           = 0;
+ /*   tempTeam.playerCount           = 0;
     tempTeam.numberOfMatchesWon    = 0;
     tempTeam.numberOfMatchesTied   = 0;
     tempTeam.numberOfMatchesLost   = 0;
     tempTeam.numberOfGoalsScored   = 0;
     tempTeam.numberOfGoalsLetIn    = 0;
     tempTeam.numberOfPoints        = 0;
-
+*/
 //    tempTeam.nameOfTeam     = calloc(MAXNAMELENGTH + 1, sizeof(char));
 //    tempTeam.nameOfCoach    = calloc(MAXNAMELENGTH + 1, sizeof(char));
 
@@ -167,6 +167,14 @@ extern short loadTeams(char const * pFileNameOfFileToLoad)
                 {
                     do
                     {
+                        tempTeam.playerCount           = 0;
+                        tempTeam.numberOfMatchesWon    = 0;
+                        tempTeam.numberOfMatchesTied   = 0;
+                        tempTeam.numberOfMatchesLost   = 0;
+                        tempTeam.numberOfGoalsScored   = 0;
+                        tempTeam.numberOfGoalsLetIn    = 0;
+                        tempTeam.numberOfPoints        = 0;
+
                         if(fgets(readBuffer, sizeof(readBuffer), pFileHandleDataBase)/* == NULL      !!!ERRORHANDLING NOCH IMPLEMENTIEREN!!!   */)
                         {
                             if(strncmp(readBuffer, STARTTAG_TEAM, sizeof(STARTTAG_TEAM) - 1) == 0)
@@ -271,10 +279,14 @@ static short loadOneTeamAttribute(FILE *const pFileHandleDataBase, FILE *const p
 
     } else if(strncmp(pReadStringFromFile, STARTTAG_TEAM_PLAYER, sizeof(STARTTAG_TEAM_PLAYER) - 1) == 0)
     {
-        if(loadOnePlayer(pFileHandleDataBase, pFileHandleErrorLog, &(pTeamToLoad->players[pTeamToLoad->playerCount])))
+        if(pTeamToLoad->playerCount < MAXPLAYER)
         {
-            pTeamToLoad->playerCount++;
-            return 1;
+            if(loadOnePlayer(pFileHandleDataBase, pFileHandleErrorLog, &(pTeamToLoad->players[pTeamToLoad->playerCount])))
+            {
+               // printf("Spieler %s erfolgreich geladen!\n", (pTeamToLoad->players + pTeamToLoad->playerCount)->nameOfPlayer);
+                (pTeamToLoad->playerCount)++;
+                return 1;
+            }
         }
 
     } else if(strncmp(pReadStringFromFile, STARTTAG_TEAM_MATCHESWON, sizeof(STARTTAG_TEAM_MATCHESWON) - 1) == 0)
@@ -340,7 +352,8 @@ static short loadOnePlayer(FILE *const pFileHandleDataBase, FILE *const pFileHan
     char readBuffer[100];
 
     pPlayerToLoad->nameOfPlayer    = calloc(MAXNAMELENGTH + 1, sizeof(char));
-    pPlayerToLoad->birthday        = calloc(1 + 1, sizeof(TDate));
+    pPlayerToLoad->birthday        = calloc(1, sizeof(TDate));
+    pPlayerToLoad->birthday->day   = 1;
 
     if(fgets(readBuffer, sizeof(readBuffer), pFileHandleDataBase) == NULL)
     {
