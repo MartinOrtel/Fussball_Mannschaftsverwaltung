@@ -8,21 +8,24 @@
 #include "datastructure.h"
 #include "dateutils.h"
 #include "sort.h"
+#include "list.h"
 
 #include "menu.h"
 
-
+static short getListingDirection();
 static void listOneTeam(const TTeam pTeamToPrint);
 static void listOnePlayer(const TPlayer pPlayerToPrint);
 
 //globale Variablen (pfui!)
 
-unsigned short globalTeamCounter = 0;
-TTeam globalTeams[MAXTEAMS];
+unsigned long globalTeamCounter = 0;
+//TTeam globalTeams[MAXTEAMS];
+TTeam *pFirstTeamInDVList = NULL, *pLastTeamInDVList = NULL;
 
 extern void createTeam()
 {
-    TTeam TmpTeam;                                                              // local Team to work with in this function
+    TTeam *pTempTeam;
+    pTempTeam = malloc(sizeof(TTeam));                                   // local Team to work with in this function
 
     char const *pTitle                = "Erfassung einer neuen Mannschaft";      // Arrays used for prompts
     char const *pNameOfTeamPrompt     = "Geben Sie bitte den Namen der Mannschaft ein:\n-> ";
@@ -44,35 +47,40 @@ extern void createTeam()
 
     // prompt of team name
 
-    getText( pNameOfTeamPrompt, 50, 0, &TmpTeam.nameOfTeam );
+    getText( pNameOfTeamPrompt, 50, 0, &(pTempTeam->nameOfTeam) );
 
     // prompt of coach name
 
-    getText(pNameOfCoachPrompt, 50, 0, &TmpTeam.nameOfCoach);
+    getText(pNameOfCoachPrompt, 50, 0, &(pTempTeam->nameOfCoach) );
 
     // prompt of player adding
 
-    TmpTeam.playerCount = 0;
+    pTempTeam->playerCount = 0;
 
     do
     {
-        addPlayer(&TmpTeam.players[TmpTeam.playerCount]);
+        addPlayer(&(pTempTeam->players[pTempTeam->playerCount]));
 
-        TmpTeam.playerCount++;
+        pTempTeam->playerCount++;
 
        // i = askPolarQuestion("Moechten Sie einen weiteren Spieler eingeben (j/n)")
 
     } while( askPolarQuestion("Moechten Sie einen weiteren Spieler eingeben (j/n) ? ") );
 
-    TmpTeam.numberOfMatchesWon  = 0;
-    TmpTeam.numberOfMatchesTied = 0;
-    TmpTeam.numberOfMatchesLost = 0;
-    TmpTeam.numberOfGoalsScored = 0;
-    TmpTeam.numberOfGoalsLetIn  = 0;
-    TmpTeam.numberOfPoints      = 0;
+    pTempTeam->numberOfMatchesWon     = 0;
+    pTempTeam->numberOfMatchesTied    = 0;
+    pTempTeam->numberOfMatchesLost    = 0;
+    pTempTeam->numberOfGoalsScored    = 0;
+    pTempTeam->numberOfGoalsLetIn     = 0;
+    pTempTeam->numberOfPoints         = 0;
+   // pTempTeam->pNextTeamInDVList      = NULL;
+   // pTempTeam->pPreviousTeamInDVList  = NULL;
 
-    globalTeams[globalTeamCounter] = TmpTeam;
-    globalTeamCounter++;
+//    globalTeams[globalTeamCounter] = tempTeam;
+//    globalTeamCounter++;
+
+    insertInDVList(pTempTeam, compareTeams);
+
 
     waitForEnter();
 }
@@ -85,9 +93,65 @@ extern void editTeam()
 
 extern void deleteTeam()
 {
-    printf("deleteTeam");
+    char const *pTitle = "Liste der Mannschaften";
+    unsigned short i;
+    unsigned short wasAtLeastOneTeamPrinted = 0;
+    int scanfRet = 0;
+    unsigned short input;
+    unsigned short j;
+
+    TTeam *pCurrentTeamToList, *pCurrentTeamToDelete;
+
+    do
+    {
+        clearScreen();
+        printf("\n%s\n", pTitle);
+        printLine('-', strlen(pTitle));
+        printf("\n");
+
+        i = 0;
+
+        for(pCurrentTeamToList = pFirstTeamInDVList; pCurrentTeamToList != NULL; pCurrentTeamToList = pCurrentTeamToList->pNextTeamInDVList)
+        {
+            i++;
+            printf(" %hu: %s\n", i, pCurrentTeamToList->nameOfTeam);
+            wasAtLeastOneTeamPrinted = 1;
+        }
+
+        if(pCurrentTeamToList == NULL && wasAtLeastOneTeamPrinted == 0)
+        {
+            printf("-- Die Liste ist leer --\n");
+            waitForEnter();
+            return;
+        }
+
+        printf("\nWelche Mannschaft moechten Sie loeschen (0 fuer Abbrechen) ?: ");
+        scanfRet = scanf("%hu", &input);
+        clearBuffer();
+
+        if(input == 0)
+            return;
+
+    } while (scanfRet != 1 || input < 1 || input > i);
+
+    //get pointeraddress of selected Team
+
+    if(input == 1)
+        pCurrentTeamToDelete = pFirstTeamInDVList;
+    else
+    {
+        for(j = 2; j <= input; j++)
+        {
+            pCurrentTeamToDelete = pFirstTeamInDVList->pNextTeamInDVList;
+        }
+    }
+
+    pCurrentTeamToDelete = removeFromDVList(pCurrentTeamToDelete, compareTeams);
+    free(pCurrentTeamToDelete);
+
     waitForEnter();
 }
+
 
 extern void addPlayer(TPlayer * pPlayerToAdd)
 {
@@ -166,7 +230,7 @@ extern short sortTeams()
     menuPoints[1] = "Spieler nach Geburtsdatum sortieren";
     menuPoints[2] = "Spieler nach Trickotnr. sortieren";
     menuPoints[3] = "Spieler nach Anzahl geschossener Tore sortieren";
-    menuPoints[4] = "zurueck zum Hauptmenu";
+    menuPoints[4] = "zureuck zum Hauptmenu";
 
 
  //   do
@@ -175,36 +239,75 @@ extern short sortTeams()
 
         switch(selection)
         {
-            case 1: externQuickSortPlayers(compareNames);            break;
-            case 2: externQuickSortPlayers(compareBirthdays);        break;
-            case 3: externQuickSortPlayers(compareJerseyNumbers);    break;
-            case 4: externQuickSortPlayers(compareNumberOfGoals);    break;
-            case 5:                                                  break;
-            default:                                                 break;
+            case 1: quickSortPlayers(compareNames);            return 1;
+            case 2: quickSortPlayers(compareBirthdays);        return 1;
+            case 3: quickSortPlayers(compareJerseyNumbers);    return 1;
+            case 4: quickSortPlayers(compareNumberOfGoals);    return 1;
+            case 5:                                                  return 1;
+            default:                                                 return 1;
         }
 //    } while()
-    waitForEnter();
-    return 1;
 }
 
 extern void listTeams()
 {
-    char const *pTitle                = "Liste der Mannschaften";
+    char const *pTitle = "Liste der Mannschaften";
+    unsigned short wasAtLeastOneTeamPrinted = 0;
 
-    unsigned short i;
+    TTeam *pCurrentTeamToList;
 
+    short listingDirectionFromFirstElementToLast = getListingDirection();
 
     printf("\n%s\n", pTitle);
     printLine('-', strlen(pTitle));
     printf("\n");
 
-    for(i = 0; i < globalTeamCounter; i++)
-        listOneTeam(globalTeams[i]);
+    if(listingDirectionFromFirstElementToLast == 1)
+    {
+        for(pCurrentTeamToList = pFirstTeamInDVList; pCurrentTeamToList != NULL; pCurrentTeamToList = pCurrentTeamToList->pNextTeamInDVList)
+        {
+            listOneTeam(*pCurrentTeamToList);
+            wasAtLeastOneTeamPrinted = 1;
+        }
+    } else if(listingDirectionFromFirstElementToLast == 0)
+    {
+        for(pCurrentTeamToList = pLastTeamInDVList; pCurrentTeamToList != NULL; pCurrentTeamToList = pCurrentTeamToList->pPreviousTeamInDVList)
+        {
+            listOneTeam(*pCurrentTeamToList);
+            wasAtLeastOneTeamPrinted = 1;
+        }
+    } else
+        return;
 
-    if(globalTeamCounter == 0)
+
+    if(pCurrentTeamToList == NULL && wasAtLeastOneTeamPrinted == 0)
         printf("-- Die Liste ist leer --\n");
 
     waitForEnter();
+}
+
+static short getListingDirection()
+{
+    unsigned short listingDirectionFromFirstElementToLast = 99;
+
+    char const *pTitle = "Ausgabe";
+    unsigned short const numMenuPoints = 3;
+    char const * menuPoints[numMenuPoints];
+    menuPoints[0] = "Aufwaerts ausgeben";
+    menuPoints[1] = "Abwaerts ausgeben";
+    menuPoints[2] = "zurueck zum Hauptmenu";
+
+
+    listingDirectionFromFirstElementToLast = getMenu(pTitle, menuPoints, numMenuPoints);
+
+    switch(listingDirectionFromFirstElementToLast)
+    {
+        case 1:     return 1;
+        case 2:     return 0;
+        case 3:     return -1;
+        default:    break;
+    }
+    return 99;
 }
 
 static void listOneTeam(const TTeam pTeamToPrint)

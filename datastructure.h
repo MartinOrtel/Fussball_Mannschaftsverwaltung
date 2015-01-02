@@ -21,22 +21,26 @@ typedef struct
     unsigned short numberOfGoals;
 }TPlayer;
 
-typedef struct
+typedef struct sTeam
 {
     char* nameOfTeam;
     char* nameOfCoach;
     unsigned short playerCount;
-    TPlayer players[MAXPLAYER];
+    TPlayer players[MAXPLAYER + 1];
     unsigned short numberOfMatchesWon;
     unsigned short numberOfMatchesTied;
     unsigned short numberOfMatchesLost;
     unsigned short numberOfGoalsScored;
     unsigned short numberOfGoalsLetIn;
     unsigned short numberOfPoints;
+    struct sTeam *pPreviousTeamInDVList;
+    struct sTeam *pNextTeamInDVList;
 }TTeam;
 
-extern unsigned short globalTeamCounter;
-extern TTeam globalTeams[];
+extern unsigned long globalTeamCounter;
+//extern TTeam globalTeams[];
+extern TTeam *pFirstTeamInDVList, *pLastTeamInDVList;
+
 
 // database define
 #define STARTTAG_START  "<Daten>"

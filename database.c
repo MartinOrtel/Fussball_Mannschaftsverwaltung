@@ -5,6 +5,8 @@
 #include "teams.h"
 #include "database.h"
 #include "dateutils.h"
+#include "sort.h"
+#include "list.h"
 
 
 
@@ -20,7 +22,7 @@ static short loadOnePlayerAttribute(FILE *const pFileHandleDataBase, FILE *const
 
 extern short saveTeams(char const * pFileNameOfFileToSave)
 {
-    unsigned short i;
+    TTeam *pCurrentTeamToSave;
 
     FILE *pFileHandleDataBase;
 
@@ -31,8 +33,8 @@ extern short saveTeams(char const * pFileNameOfFileToSave)
     {
         if(fprintf(pFileHandleDataBase, "<Daten>\n"))
         {
-            for(i = 0; i < globalTeamCounter; i++)
-                if(saveOneTeam(pFileHandleDataBase, globalTeams[i]) == 0)
+            for(pCurrentTeamToSave = pFirstTeamInDVList; pCurrentTeamToSave != NULL; pCurrentTeamToSave = pCurrentTeamToSave->pNextTeamInDVList)
+                if(saveOneTeam(pFileHandleDataBase, *pCurrentTeamToSave) == 0)
                 {
                     fclose(pFileHandleDataBase);
                     remove(pFileNameOfFileToSave);
@@ -133,7 +135,7 @@ static short saveOnePlayer(FILE *const pFileHandleDataBase, const TPlayer player
 
 extern short loadTeams(char const * pFileNameOfFileToLoad)
 {
-    TTeam tempTeam;
+
 /*
     tempTeam.playerCount           = 0;
     tempTeam.numberOfMatchesWon    = 0;
@@ -152,6 +154,8 @@ extern short loadTeams(char const * pFileNameOfFileToLoad)
     FILE * const pFileHandleErrorLog = fopen(pFileNameOfErrorLog, "awt");
     FILE * const pFileHandleDataBase = fopen(pFileNameOfFileToLoad, "rt");
 
+
+
     char readBuffer[100];
 
 
@@ -169,21 +173,15 @@ extern short loadTeams(char const * pFileNameOfFileToLoad)
                 {
                     do
                     {
-                        tempTeam.playerCount           = 0;
-                        tempTeam.numberOfMatchesWon    = 0;
-                        tempTeam.numberOfMatchesTied   = 0;
-                        tempTeam.numberOfMatchesLost   = 0;
-                        tempTeam.numberOfGoalsScored   = 0;
-                        tempTeam.numberOfGoalsLetIn    = 0;
-                        tempTeam.numberOfPoints        = 0;
+                        TTeam *ptempTeam = malloc(sizeof(TTeam));
 
                         if(fgets(readBuffer, sizeof(readBuffer), pFileHandleDataBase)/* == NULL      !!!ERRORHANDLING NOCH IMPLEMENTIEREN!!!   */)
                         {
                             if(strncmp(readBuffer, STARTTAG_TEAM, sizeof(STARTTAG_TEAM) - 1) == 0)
                             {
-                                if(loadOneTeam(pFileHandleDataBase, pFileHandleErrorLog, &(tempTeam)) == 1)
+                                if(loadOneTeam(pFileHandleDataBase, pFileHandleErrorLog, ptempTeam) == 1)
                                 {
-                                    globalTeams[globalTeamCounter++] = tempTeam;
+                                    insertInDVList(ptempTeam, compareTeams);
                                 }
                                 else
                                 {
@@ -206,6 +204,9 @@ extern short loadTeams(char const * pFileNameOfFileToLoad)
                                 return 0;
                             }
                         }
+
+                        //free(ptempTeam);
+
                     } while(strncmp(readBuffer, ENDTAG_END, sizeof(ENDTAG_END) - 1) != 0);
                 }
             } else
@@ -226,10 +227,19 @@ extern short loadTeams(char const * pFileNameOfFileToLoad)
 
 extern short loadOneTeam(FILE *const pFileHandleDataBase, FILE *const pFileHandleErrorLog, TTeam * pTeamToLoad)
 {
-    char readBuffer[100];
+    //pTeamToLoad = malloc(sizeof(TTeam));
+    pTeamToLoad->playerCount           = 0;
+    pTeamToLoad->numberOfMatchesWon    = 0;
+    pTeamToLoad->numberOfMatchesTied   = 0;
+    pTeamToLoad->numberOfMatchesLost   = 0;
+    pTeamToLoad->numberOfGoalsScored   = 0;
+    pTeamToLoad->numberOfGoalsLetIn    = 0;
+    pTeamToLoad->numberOfPoints        = 0;
 
     pTeamToLoad->nameOfTeam     = calloc(MAXNAMELENGTH + 1, sizeof(char));
     pTeamToLoad->nameOfCoach    = calloc(MAXNAMELENGTH + 1, sizeof(char));
+
+    char readBuffer[100];
 
     do
     {
@@ -289,6 +299,12 @@ static short loadOneTeamAttribute(FILE *const pFileHandleDataBase, FILE *const p
                 return 1;
             }
         }
+        /*
+        else
+        {
+            pTeamToLoad->players[MAXPLAYER + 1] = (TPlayer)'\0';
+        }
+        */
     } else if(strncmp(pReadStringFromFile, STARTTAG_TEAM_MATCHESWON, sizeof(STARTTAG_TEAM_MATCHESWON) - 1) == 0)
     {
         sprintf(scanfFormatAsString, "%s%s%s", STARTTAG_TEAM_MATCHESWON, "%2hu", ENDTAG_TEAM_MATCHESWON);
