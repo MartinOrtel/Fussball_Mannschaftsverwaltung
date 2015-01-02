@@ -16,7 +16,7 @@ extern void deletePlayer();
 
 extern void searchPlayer();
 
-extern void sortTeams();
+extern short sortTeams();
 
 extern void listTeams();
 

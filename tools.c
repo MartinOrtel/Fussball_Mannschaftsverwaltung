@@ -240,6 +240,10 @@ extern short terminateApplication()
 {
     if(saveTeams("teams.db") == 0)
         return 0;
-
+    else
+    {
+        printf("\n Datenbank konnte nicht geschrieben werden! \n");
+        waitForEnter();
+    }
     return 1;
 }

@@ -10,7 +10,7 @@
 int main()
 {
     int selection;
-    char const * const title = "Fussball-Verwaltung Deluxe  Version 0.0.4";
+    char const * const title = "Fussball-Verwaltung Deluxe  Version 0.5.0";
 
     unsigned short const numMenuPoints = 8;
     char const * menuPoints[numMenuPoints];
