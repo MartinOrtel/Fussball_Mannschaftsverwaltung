@@ -10,7 +10,7 @@
 int main()
 {
     int selection;
-    char const * const title = "Fussball-Verwaltung Deluxe  Version 0.5.0";
+    char const * const title = "Fussball-Verwaltung Deluxe  Version 0.6.0";
 
     unsigned short const numMenuPoints = 8;
     char const * menuPoints[numMenuPoints];
@@ -32,7 +32,7 @@ int main()
         switch(selection)
         {
             case 1: createTeam();                                       break;
-            case 2: addPlayer(&globalTeams[globalTeamCounter].players[globalTeams[globalTeamCounter].playerCount]);  break;
+            case 2: /* addPlayer(&globalTeams[globalTeamCounter].players[globalTeams[globalTeamCounter].playerCount]); */  break;
             case 3: deletePlayer();                                     break;
             case 4: deleteTeam();                                       break;
             case 5: searchPlayer();                                     break;
