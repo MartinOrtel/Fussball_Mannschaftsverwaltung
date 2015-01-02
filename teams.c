@@ -7,6 +7,9 @@
 #include "teams.h"
 #include "datastructure.h"
 #include "dateutils.h"
+#include "sort.h"
+
+#include "menu.h"
 
 
 static void listOneTeam(const TTeam pTeamToPrint);
@@ -151,10 +154,37 @@ extern void searchPlayer()
     waitForEnter();
 }
 
-extern void sortTeams()
+extern short sortTeams()
 {
-    printf("sortTeams");
+   // int i = 0;
+    int selection;
+    char const * const title = "Sortieren";
+
+    unsigned short const numMenuPoints = 5;
+    char const * menuPoints[numMenuPoints];
+    menuPoints[0] = "Spieler nach Namen sortieren";
+    menuPoints[1] = "Spieler nach Geburtsdatum sortieren";
+    menuPoints[2] = "Spieler nach Trickotnr. sortieren";
+    menuPoints[3] = "Spieler nach Anzahl geschossener Tore sortieren";
+    menuPoints[4] = "zurueck zum Hauptmenu";
+
+
+ //   do
+ //   {
+        selection = getMenu(title, menuPoints, numMenuPoints);
+
+        switch(selection)
+        {
+            case 1: externQuickSortPlayers(compareNames);            break;
+            case 2: externQuickSortPlayers(compareBirthdays);        break;
+            case 3: externQuickSortPlayers(compareJerseyNumbers);    break;
+            case 4: externQuickSortPlayers(compareNumberOfGoals);    break;
+            case 5:                                                  break;
+            default:                                                 break;
+        }
+//    } while()
     waitForEnter();
+    return 1;
 }
 
 extern void listTeams()
@@ -215,6 +245,7 @@ static void listOneTeam(const TTeam pTeamToPrint)
 
 static void listOnePlayer(const TPlayer pPlayerToPrint)
 {
-    printf("%20s (%02u; ", pPlayerToPrint.nameOfPlayer, pPlayerToPrint.jerseyNumber);
-    printf("* %02u.%02u.%04u)", pPlayerToPrint.birthday->day, pPlayerToPrint.birthday->month, pPlayerToPrint.birthday->year);
+    printf("%-25s (%02u; ", pPlayerToPrint.nameOfPlayer, pPlayerToPrint.jerseyNumber);
+    printf("* %02u.%02u.%04u; ", pPlayerToPrint.birthday->day, pPlayerToPrint.birthday->month, pPlayerToPrint.birthday->year);
+    printf("%2hu)", pPlayerToPrint.numberOfGoals);
 }

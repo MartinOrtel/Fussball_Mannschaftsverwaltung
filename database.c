@@ -51,9 +51,11 @@ extern short saveTeams(char const * pFileNameOfFileToSave)
             fclose(pFileHandleDataBase);
             remove(pFileNameOfFileToSave);
         }
-    }
 
     fclose(pFileHandleDataBase);
+    }
+
+
 
     return 1;
 }
@@ -101,8 +103,8 @@ static short savePlayers(FILE *const pFileHandleDataBase, const TPlayer * pPlaye
     unsigned short i;
 
     for(i = 0; i < playerCount; i++)
-        if(saveOnePlayer(pFileHandleDataBase, pPlayersToSave[i]) == 0)
-            return 0;
+            if(saveOnePlayer(pFileHandleDataBase, pPlayersToSave[i]) == 0)
+                return 0;
 
     return 1;
 }
@@ -132,8 +134,8 @@ static short saveOnePlayer(FILE *const pFileHandleDataBase, const TPlayer player
 extern short loadTeams(char const * pFileNameOfFileToLoad)
 {
     TTeam tempTeam;
-
- /*   tempTeam.playerCount           = 0;
+/*
+    tempTeam.playerCount           = 0;
     tempTeam.numberOfMatchesWon    = 0;
     tempTeam.numberOfMatchesTied   = 0;
     tempTeam.numberOfMatchesLost   = 0;
@@ -283,12 +285,10 @@ static short loadOneTeamAttribute(FILE *const pFileHandleDataBase, FILE *const p
         {
             if(loadOnePlayer(pFileHandleDataBase, pFileHandleErrorLog, &(pTeamToLoad->players[pTeamToLoad->playerCount])))
             {
-               // printf("Spieler %s erfolgreich geladen!\n", (pTeamToLoad->players + pTeamToLoad->playerCount)->nameOfPlayer);
                 (pTeamToLoad->playerCount)++;
                 return 1;
             }
         }
-
     } else if(strncmp(pReadStringFromFile, STARTTAG_TEAM_MATCHESWON, sizeof(STARTTAG_TEAM_MATCHESWON) - 1) == 0)
     {
         sprintf(scanfFormatAsString, "%s%s%s", STARTTAG_TEAM_MATCHESWON, "%2hu", ENDTAG_TEAM_MATCHESWON);
@@ -351,9 +351,8 @@ static short loadOnePlayer(FILE *const pFileHandleDataBase, FILE *const pFileHan
 {
     char readBuffer[100];
 
-    pPlayerToLoad->nameOfPlayer    = calloc(MAXNAMELENGTH + 1, sizeof(char));
-    pPlayerToLoad->birthday        = calloc(1, sizeof(TDate));
-    pPlayerToLoad->birthday->day   = 1;
+    pPlayerToLoad->nameOfPlayer    = calloc((MAXNAMELENGTH + 1), sizeof(char));
+    pPlayerToLoad->birthday        = calloc((1+1), sizeof(TDate));
 
     if(fgets(readBuffer, sizeof(readBuffer), pFileHandleDataBase) == NULL)
     {
