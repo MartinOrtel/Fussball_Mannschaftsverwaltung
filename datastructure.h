@@ -5,42 +5,56 @@
 //unsigned const short MAXPLAYER = 23;
 #define MAXPLAYER 23
 #define MAXNAMELENGTH 50
+#define MAXINDEX 307
 
 typedef struct
 {
-    unsigned short day;
-    unsigned short month;
-    unsigned short year;
-}TDate;
+   unsigned short day;
+   unsigned short month;
+   unsigned short year;
+} TDate;
 
 typedef struct
 {
-    char* nameOfPlayer;
-    TDate* birthday;
-    unsigned short jerseyNumber;
-    unsigned short numberOfGoals;
-}TPlayer;
+   char* nameOfPlayer;
+   TDate* birthday;
+   unsigned short jerseyNumber;
+   unsigned short numberOfGoals;
+} TPlayer;
 
 typedef struct sTeam
 {
-    char* nameOfTeam;
-    char* nameOfCoach;
-    unsigned short playerCount;
-    TPlayer players[MAXPLAYER + 1];
-    unsigned short numberOfMatchesWon;
-    unsigned short numberOfMatchesTied;
-    unsigned short numberOfMatchesLost;
-    unsigned short numberOfGoalsScored;
-    unsigned short numberOfGoalsLetIn;
-    unsigned short numberOfPoints;
-    struct sTeam *pPreviousTeamInDVList;
-    struct sTeam *pNextTeamInDVList;
-}TTeam;
+   char* nameOfTeam;
+   char* nameOfCoach;
+   unsigned short playerCount;
+   TPlayer players[MAXPLAYER + 1];
+   unsigned short numberOfMatchesWon;
+   unsigned short numberOfMatchesTied;
+   unsigned short numberOfMatchesLost;
+   unsigned short numberOfGoalsScored;
+   unsigned short numberOfGoalsLetIn;
+   unsigned short numberOfPoints;
+   struct sTeam *pPreviousTeamInDVList;
+   struct sTeam *pNextTeamInDVList;
+} TTeam;
+
+typedef struct sListElement
+{
+   TTeam *pTeam;
+   TPlayer *pPlayer;
+   struct sListElement *pNextListElement;
+} TListElement;
+
+typedef struct
+{
+   TListElement *pFirstListElement;
+   TListElement *pLastListElement;
+} THashElement;
+
 
 extern unsigned long globalTeamCounter;
-//extern TTeam globalTeams[];
 extern TTeam *pFirstTeamInDVList, *pLastTeamInDVList;
-
+extern THashElement aPlayerIndex[];
 
 // database define
 #define STARTTAG_START  "<Daten>"

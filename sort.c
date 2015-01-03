@@ -1,34 +1,43 @@
-#include "sort.h"
-#include "dateutils.h"
-#include "datastructure.h"
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+
+#include "sort.h"
+#include "dateutils.h"
+#include "datastructure.h"
+#include "search.h"
+
 
 int DURCHLAUF = 1;
+
+static void swapPlayers(TPlayer *pFirstPlayerToSwap, TPlayer *pSecondPlayerToSwap);
+static void swapListElements(TPlayer *pFirstPlayerToSwap, TPlayer *pSecondPlayerToSwap);
 
 int partition(TPlayer *pPlayersToSort, const short ui, const short oi, short(*compare)(const TPlayer *, const TPlayer *))
 {
    int i = ui + 1, j = oi;   // Laufindizes
-   TPlayer temp;    // = *(pPlayersToSort + ui);
+//   TPlayer temp;    // = *(pPlayersToSort + ui);
    TPlayer comp = *(pPlayersToSort + ui); //Vergleichselement (Schranke)
 
    while (i <= j)
    {
-      // nächstes Element > comp von links suchen (im linken Teil)
+      // nÃ¤chstes Element > comp von links suchen (im linken Teil)
       while (i <= j && compare(pPlayersToSort + i, &comp) <= 0)
          i++;
 
-      // nächstes Element < comp von rechts suchen (im rechten Teil)
+      // nÃ¤chstes Element < comp von rechts suchen (im rechten Teil)
       while (i <= j && compare(pPlayersToSort + j, &comp) >= 0)
          j--;
 
       if (i < j)
       {
+         /*
          temp = *(pPlayersToSort + i);
          *(pPlayersToSort + i) = *(pPlayersToSort + j);
          *(pPlayersToSort + j) = temp;
-         //swapPlayers(pPlayersToSort + i, pPlayersToSort + j);
+         */
+         swapPlayers(pPlayersToSort + i, pPlayersToSort + j);
          i++;
          j--;
       }
@@ -37,10 +46,12 @@ int partition(TPlayer *pPlayersToSort, const short ui, const short oi, short(*co
    i--;
 
    // setze Vergleichselement (Schranke) zwischen beide Teile
+   /*
    temp = *(pPlayersToSort + i);
    *(pPlayersToSort + i) = *(pPlayersToSort + ui);
    *(pPlayersToSort + ui) = temp;
-   //swapPlayers(pPlayersToSort + ui, pPlayersToSort + i);
+   */
+   swapPlayers(pPlayersToSort + ui, pPlayersToSort + i);
 
    return(i);
 }
@@ -49,7 +60,7 @@ void internQuickSortPlayers(TPlayer *pPlayersToSort, const short ui, const short
 {
    // qsortCalendar(compare, swapApps, 0, AppointmentCount - 1);
 
-    // Globale sortierungs-Variable setzen, damit listCalendar() weiß, wonach sortiert ist.
+   // Globale sortierungs-Variable setzen, damit listCalendar() weiÃŸ, wonach sortiert ist.
    int idx;   // Schranke einer Zerlegung
 
    if (ui >= oi)
@@ -64,62 +75,88 @@ void internQuickSortPlayers(TPlayer *pPlayersToSort, const short ui, const short
 // Es gibt als Swap-Funktion nur eine einzige, diese wird hier eingesetzt.
 void quickSortPlayers(short (*compare)(const TPlayer *, const TPlayer *))
 {
-    TTeam *pCurrentTeamToSort;
+   TTeam *pCurrentTeamToSort;
 
-    for(pCurrentTeamToSort = pFirstTeamInDVList; pCurrentTeamToSort != NULL; pCurrentTeamToSort = pCurrentTeamToSort->pNextTeamInDVList)
-    {
-        internQuickSortPlayers(pCurrentTeamToSort->players, 0, (pCurrentTeamToSort->playerCount) - 1, compare);
-    }
+   for(pCurrentTeamToSort = pFirstTeamInDVList; pCurrentTeamToSort != NULL; pCurrentTeamToSort = pCurrentTeamToSort->pNextTeamInDVList)
+   {
+      internQuickSortPlayers(pCurrentTeamToSort->players, 0, (pCurrentTeamToSort->playerCount) - 1, compare);
+   }
 
 }
 
 
 short compareTeams(const TTeam *pFirstTeamToCompare, const TTeam *pSecondTeamToCompare)
 {
-    return strcmp(pFirstTeamToCompare->nameOfTeam, pSecondTeamToCompare->nameOfTeam);
+   return strcmp(pFirstTeamToCompare->nameOfTeam, pSecondTeamToCompare->nameOfTeam);
 }
 
 short compareNames(const TPlayer *pFirstPlayerToCompare, const TPlayer *pSecondPlayerToCompare)
 {
-    printf("Durchlauf Nummer %i Vergleiche %s mit %s\n", DURCHLAUF++, pFirstPlayerToCompare->nameOfPlayer, pSecondPlayerToCompare->nameOfPlayer);
-    return strcmp(pFirstPlayerToCompare->nameOfPlayer, pSecondPlayerToCompare->nameOfPlayer);
+   printf("Durchlauf Nummer %i Vergleiche %s mit %s\n", DURCHLAUF++, pFirstPlayerToCompare->nameOfPlayer, pSecondPlayerToCompare->nameOfPlayer);
+   return strcmp(pFirstPlayerToCompare->nameOfPlayer, pSecondPlayerToCompare->nameOfPlayer);
 }
 
 short compareBirthdays(const TPlayer *pFirstPlayerToCompare, const TPlayer *pSecondPlayerToCompare)
 {
-    short diffMonths;
-    short diffYears;
+   short diffMonths;
+   short diffYears;
 
 
-    diffYears = pFirstPlayerToCompare->birthday->year - pSecondPlayerToCompare->birthday->year;
-    if (diffYears == 0)
-    {
-        diffMonths = pFirstPlayerToCompare->birthday->month - pSecondPlayerToCompare->birthday->month;
-        if (diffMonths == 0)
-            return pFirstPlayerToCompare->birthday->day - pSecondPlayerToCompare->birthday->day;
-        else
-            return diffMonths;
-    }
+   diffYears = pFirstPlayerToCompare->birthday->year - pSecondPlayerToCompare->birthday->year;
+   if (diffYears == 0)
+   {
+      diffMonths = pFirstPlayerToCompare->birthday->month - pSecondPlayerToCompare->birthday->month;
+      if (diffMonths == 0)
+         return pFirstPlayerToCompare->birthday->day - pSecondPlayerToCompare->birthday->day;
+      else
+         return diffMonths;
+   }
 
-    return diffYears;
+   return diffYears;
 
 }
 
 short compareJerseyNumbers(const TPlayer *pFirstPlayerToCompare, const TPlayer *pSecondPlayerToCompare)
 {
-    return pFirstPlayerToCompare->jerseyNumber - pSecondPlayerToCompare->jerseyNumber;
+   return pFirstPlayerToCompare->jerseyNumber - pSecondPlayerToCompare->jerseyNumber;
 }
 
 short compareNumberOfGoals(const TPlayer *pFirstPlayerToCompare, const TPlayer *pSecondPlayerToCompare)
 {
-    return pFirstPlayerToCompare->numberOfGoals - pSecondPlayerToCompare->numberOfGoals;
+   return pFirstPlayerToCompare->numberOfGoals - pSecondPlayerToCompare->numberOfGoals;
 }
 
-void swapPlayers(TPlayer *pFirstPlayerToSwap, TPlayer *pSecondPlayerToSwap)
+static void swapPlayers(TPlayer *pFirstPlayerToSwap, TPlayer *pSecondPlayerToSwap)
 {
-    TPlayer temp;
+   TPlayer tempPlayer;
 
-    temp = *pFirstPlayerToSwap;
-    *pFirstPlayerToSwap = *pSecondPlayerToSwap;
-    *pSecondPlayerToSwap = temp;
+
+   swapListElements(pFirstPlayerToSwap, pSecondPlayerToSwap);
+
+
+   tempPlayer = *pFirstPlayerToSwap;
+   *pFirstPlayerToSwap = *pSecondPlayerToSwap;
+   *pSecondPlayerToSwap = tempPlayer;
+
 }
+
+static void swapListElements(TPlayer *pFirstPlayerToSwap, TPlayer *pSecondPlayerToSwap)
+{
+   unsigned short hashValueOfFirstPlayer  = calcDivisionRemainder(pFirstPlayerToSwap->nameOfPlayer);
+   unsigned short hashValueOfSecondPlayer = calcDivisionRemainder(pSecondPlayerToSwap->nameOfPlayer);
+   TListElement *pFirstTempListElement  = calloc(1, sizeof(TListElement));
+   TListElement *pSecondTempListElement = calloc(1, sizeof(TListElement));
+   TPlayer *pTempPlayer;
+//   TTeam *pTempTeam;
+
+   for(pFirstTempListElement = (aPlayerIndex + hashValueOfFirstPlayer)->pFirstListElement; pFirstTempListElement->pPlayer != pFirstPlayerToSwap; pFirstTempListElement = pFirstTempListElement->pNextListElement)
+   {}
+   for(pSecondTempListElement = (aPlayerIndex + hashValueOfSecondPlayer)->pFirstListElement; pSecondTempListElement->pPlayer != pSecondPlayerToSwap; pSecondTempListElement = pSecondTempListElement->pNextListElement)
+   {}
+
+   pTempPlayer = pFirstTempListElement->pPlayer;
+   pFirstTempListElement->pPlayer = pSecondTempListElement->pPlayer;
+   pSecondTempListElement->pPlayer = pTempPlayer;
+
+}
+

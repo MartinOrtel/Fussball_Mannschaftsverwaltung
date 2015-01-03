@@ -9,42 +9,62 @@
 
 int main()
 {
-    int selection;
-    char const * const title = "Fussball-Verwaltung Deluxe  Version 0.6.0";
+   int selection;
+   char const * const title = "Fussball-Verwaltung Deluxe  Version 0.7.0";
 
-    unsigned short const numMenuPoints = 8;
-    char const * menuPoints[numMenuPoints];
-    menuPoints[0] = "Neue Mannschaft anlegen";
-    menuPoints[1] = "Spieler hinzufuegen";
-    menuPoints[2] = "Spieler loeschen";
-    menuPoints[3] = "Mannschaft loeschen";
-    menuPoints[4] = "Suchen";
-    menuPoints[5] = "Sortieren";
-    menuPoints[6] = "Auflisten";
-    menuPoints[7] = "Programm beenden";
+   unsigned short const numMenuPoints = 9;
+   char const * aMenuPoints[numMenuPoints];
+   aMenuPoints[0] = "Neue Mannschaft anlegen";
+   aMenuPoints[1] = "Spieler hinzufuegen";
+   aMenuPoints[2] = "Spieler loeschen";
+   aMenuPoints[3] = "Mannschaft loeschen";
+   aMenuPoints[4] = "Suchen";
+   aMenuPoints[5] = "Sortieren";
+   aMenuPoints[6] = "Auflisten";
+   aMenuPoints[7] = "Index auflisten";
+   aMenuPoints[8] = "Programm beenden";
 
-    loadTeams("teams.db");
+   loadTeams("teams.db");
 
-    do
-    {
-        selection = getMenu(title, menuPoints, numMenuPoints);
+   do
+   {
+      selection = getMenu(title, aMenuPoints, numMenuPoints);
 
-        switch(selection)
-        {
-            case 1: createTeam();                                       break;
-            case 2: /* addPlayer(&globalTeams[globalTeamCounter].players[globalTeams[globalTeamCounter].playerCount]); */  break;
-            case 3: deletePlayer();                                     break;
-            case 4: deleteTeam();                                       break;
-            case 5: searchPlayer();                                     break;
-            case 6: sortTeams();                                        break;
-            case 7: listTeams();                                        break;
-            case 8: if(terminateApplication() == 0)
-                        printf("Fehler beim Speichern!!");
-                                                                        break;
-            default:                                                   break;
-        }
+      switch(selection)
+      {
+      case 1:
+         createTeam();
+         break;
+      case 2: /* addPlayer(&globalTeams[globalTeamCounter].players[globalTeams[globalTeamCounter].playerCount]); */
+         break;
+      case 3:
+         deletePlayer();
+         break;
+      case 4:
+         deleteTeam();
+         break;
+      case 5:
+         searchPlayer();
+         break;
+      case 6:
+         sortTeams();
+         break;
+      case 7:
+         listTeams();
+         break;
+      case 8:
+         listIndex();
+         break;
+      case 9:
+         if(terminateApplication() == 0)
+            printf("Fehler beim Speichern!!");
+         break;
+      default:
+         break;
+      }
 
-    } while(selection != 8);
+   }
+   while(selection != 9);
 
-    return 0;
+   return 0;
 }
