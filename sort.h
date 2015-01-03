@@ -13,6 +13,6 @@ short compareBirthdays(const TPlayer *pFirstPlayerToCompare, const TPlayer *pSec
 short compareJerseyNumbers(const TPlayer *pFirstPlayerToCompare, const TPlayer *pSecondPlayerToCompare);
 short compareNumberOfGoals(const TPlayer *pFirstPlayerToCompare, const TPlayer *pSecondPlayerToCompare);
 
-void swapPlayers(TPlayer *pFirstPlayerToSwap, TPlayer *pSecondPlayerToSwap);
+//void swapPlayers(TPlayer *pFirstPlayerToSwap, TPlayer *pSecondPlayerToSwap);
 
 #endif // SORT_H_INCLUDED

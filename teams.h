@@ -2,6 +2,7 @@
 #define TEAMS_H_INCLUDED
 #include "datastructure.h"
 
+
 extern void createTeam();
 
 extern void editTeam();
@@ -20,8 +21,6 @@ extern short sortTeams();
 
 extern void listTeams();
 
-//static void listOneTeam(const TTeam pTeamToPrint);
-
-//static void listOnePlayer();
+extern void listIndex();
 
 #endif // TEAMS_H_INCLUDED

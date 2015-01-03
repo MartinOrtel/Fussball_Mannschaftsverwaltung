@@ -15,152 +15,152 @@ extern void printErrorMessage()
 
 extern short getText(char const *pPrompt, unsigned short maxLengthOfUserInput, unsigned short allowEmptyText, char **ppReturnString)
 {
-    char scanfFormatAsString[20];                                   // Inhalt sieht nachher beispielsweise so aus (bei maxLengthOfUserInput = 15): "%15[^\n]"
-    unsigned short successfullScanf;
-    unsigned short doContinue = 1;                                    // Schleife wird solange ausgeführt, bis continue = 0 ist.
-    unsigned short lengthOfUserInput;                               // Länge der vom Benutzer eingegebenen Zeichenkette
-    char *pUserInput = calloc(maxLengthOfUserInput + 1, sizeof(char));
+   char aScanfFormatAsString[20];                                   // Inhalt sieht nachher beispielsweise so aus (bei maxLengthOfUserInput = 15): "%15[^\n]"
+   unsigned short successfullScanf;
+   unsigned short doContinue = 1;                                    // Schleife wird solange ausgeführt, bis continue = 0 ist.
+   unsigned short lengthOfUserInput;                               // Länge der vom Benutzer eingegebenen Zeichenkette
+   char *pUserInput = calloc(maxLengthOfUserInput + 1, sizeof(char));
 
-    if (pUserInput != NULL)
-    {
-        sprintf(scanfFormatAsString, "%%%hu[^\n]", maxLengthOfUserInput);
-        do
-        {
-            printf("%s", pPrompt);
-            successfullScanf = scanf(scanfFormatAsString, pUserInput);
-            clearBuffer(); // Notwendig?
+   if (pUserInput != NULL)
+   {
+      sprintf(aScanfFormatAsString, "%%%hu[^\n]", maxLengthOfUserInput);
+      do
+      {
+         printf("%s", pPrompt);
+         successfullScanf = scanf(aScanfFormatAsString, pUserInput);
+         clearBuffer(); // Notwendig?
 
-            lengthOfUserInput = strlen(pUserInput);
-            if (successfullScanf == 1)
+         lengthOfUserInput = strlen(pUserInput);
+         if (successfullScanf == 1)
+         {
+            if (lengthOfUserInput > 0)
             {
-                if (lengthOfUserInput > 0)
-                {
-                    if (lengthOfUserInput < maxLengthOfUserInput)
-                    {
-                        *ppReturnString = calloc(lengthOfUserInput + 1, sizeof(char));
-                                                                   // Für den String wird genau so viel Speicher reserviert, wie nötig ist.
-                        if (*ppReturnString != NULL)
-                        {
-                            doContinue= 0;                               // Schleife verlassen
-                            strcpy(*ppReturnString, pUserInput);                    // Benutzereingabe in das "zurückzugebende" Argumgent kopieren
-                        }
-                        else
-                        {
-                            free(pUserInput);
-                            assert(*ppReturnString == NULL);
-                            return 0;                                   // Es konnte kein Speicher reserviert werden
-                        }
-                    } else
-                    {
-                        printf("\nInfo: Bitte geben Sie maximal %u Zeichen ein\n\n", maxLengthOfUserInput);
-                    }
-                }
-                else
-                {
-                                                                    // Der Benutzer hat nur die Eingabetaste gedrückt.
-                    if (allowEmptyText != 0)
-                        doContinue = 0;                               // emptyness is allowed. break loop
-                }
+               if (lengthOfUserInput < maxLengthOfUserInput)
+               {
+                  *ppReturnString = calloc(lengthOfUserInput + 1, sizeof(char));
+                  // Für den String wird genau so viel Speicher reserviert, wie nötig ist.
+                  if (*ppReturnString != NULL)
+                  {
+                     doContinue= 0;                               // Schleife verlassen
+                     strcpy(*ppReturnString, pUserInput);                    // Benutzereingabe in das "zurückzugebende" Argumgent kopieren
+                  }
+                  else
+                  {
+                     free(pUserInput);
+                     assert(*ppReturnString == NULL);
+                     return 0;                                   // Es konnte kein Speicher reserviert werden
+                  }
+               } else
+               {
+                  printf("\nInfo: Bitte geben Sie maximal %u Zeichen ein\n\n", maxLengthOfUserInput);
+               }
             }
             else
             {
-                if (lengthOfUserInput == 0 && allowEmptyText != 0)
-                {
-                    doContinue = 0;                                   // emptyness is allowed. break loop
-                    *ppReturnString = NULL;                               // Ist gültig, da dieser Punkt nur erreicht werden kann, wenn allowEmptyText = 1 ist.
-                }
+               // Der Benutzer hat nur die Eingabetaste gedrückt.
+               if (allowEmptyText != 0)
+                  doContinue = 0;                               // emptyness is allowed. break loop
             }
-        } while (doContinue != 0);
-    }
-    else
-        return 0;                                                   // Speicher konnte nicht reserviert werden
+         }
+         else
+         {
+            if (lengthOfUserInput == 0 && allowEmptyText != 0)
+            {
+               doContinue = 0;                                   // emptyness is allowed. break loop
+               *ppReturnString = NULL;                               // Ist gültig, da dieser Punkt nur erreicht werden kann, wenn allowEmptyText = 1 ist.
+            }
+         }
+      } while (doContinue != 0);
+   }
+   else
+      return 0;                                                   // Speicher konnte nicht reserviert werden
 
-    free(pUserInput);
+   free(pUserInput);
 
-    return 1;                                                       // Alles ok
+   return 1;                                                       // Alles ok
 }
 
 extern short getNumber(char const *pPrompt, unsigned short *ppReturnNumber, unsigned short lowestNumberAllowed, unsigned short highesNumberAllowed)
 {
-    unsigned short successfullScanf;
-    unsigned short doContinue = 1;
-    unsigned short maxDigits = 3;
-    unsigned short lengthOfUserInput;
-    unsigned short userInputAsUnsignedShort;
-    char pUserInput[3];
-    char scanfFormatAsString[20];
+   unsigned short successfullScanf;
+   unsigned short doContinue = 1;
+   unsigned short maxDigits = 3;
+   unsigned short lengthOfUserInput;
+   unsigned short userInputAsUnsignedShort;
+   char aUserInput[3];
+   char aScanfFormatAsString[20];
 
 
-    sprintf(scanfFormatAsString, "%%%hu[^\n]", maxDigits);
+   sprintf(aScanfFormatAsString, "%%%hu[^\n]", maxDigits);
 
-    do
-    {
-        printf("%s", pPrompt);
-        successfullScanf = scanf(scanfFormatAsString, pUserInput);
-        clearBuffer();
+   do
+   {
+      printf("%s", pPrompt);
+      successfullScanf = scanf(aScanfFormatAsString, aUserInput);
+      clearBuffer();
 
 
-        lengthOfUserInput = strlen(pUserInput);
-        if (successfullScanf == 1)
-        {
-            if (lengthOfUserInput > 0)
+      lengthOfUserInput = strlen(aUserInput);
+      if (successfullScanf == 1)
+      {
+         if (lengthOfUserInput > 0)
+         {
+            userInputAsUnsignedShort = atoi(aUserInput);
+
+            if (userInputAsUnsignedShort >= lowestNumberAllowed && userInputAsUnsignedShort <= highesNumberAllowed)
             {
-                userInputAsUnsignedShort = atoi(pUserInput);
-
-                if (userInputAsUnsignedShort >= lowestNumberAllowed && userInputAsUnsignedShort <= highesNumberAllowed)
-                {
-                    *ppReturnNumber = userInputAsUnsignedShort;
-                    doContinue = 0;
-                } else
-                {
-                    printf("\nInfo: Bitte geben Sie nur Zahlen zwischen %u und %u ein\n\n", lowestNumberAllowed, highesNumberAllowed);
-                }
+               *ppReturnNumber = userInputAsUnsignedShort;
+               doContinue = 0;
+            } else
+            {
+               printf("\nInfo: Bitte geben Sie nur Zahlen zwischen %u und %u ein\n\n", lowestNumberAllowed, highesNumberAllowed);
             }
-        }
-    } while (doContinue != 0);
+         }
+      }
+   } while (doContinue != 0);
 
-    return 1;
+   return 1;
 }
 
 extern short askPolarQuestion(char * pPrompt)
 {
-    int readSuccessfully;
-    char userInput;
+   int readSuccessfully;
+   char userInput;
 
-    do
-    {
-        printf("%s", pPrompt);
+   do
+   {
+      printf("%s", pPrompt);
 
 // Benutzereingabe einlesen
 
-    readSuccessfully = scanf("%c", &userInput); // Ein Zeichen einlesen
-    if (userInput != '\n')
-    {
-        clearBuffer();
-    }
+      readSuccessfully = scanf("%c", &userInput); // Ein Zeichen einlesen
+      if (userInput != '\n')
+      {
+         clearBuffer();
+      }
 
 // UserInput überprüfen
-    if (readSuccessfully != 1)
-    {
-        printErrorMessage(); // Fehlermeldung hinter dem Eingabecursor ausgeben
-    }else
-    {
+      if (readSuccessfully != 1)
+      {
+         printErrorMessage(); // Fehlermeldung hinter dem Eingabecursor ausgeben
+      } else
+      {
 // Gültige Antworten auf die Frage sind 'j', 'J', 'n' und 'N'.
-        switch (userInput)
-        {
-            case 'j':
-            case 'J':
-               return 1;
+         switch (userInput)
+         {
+         case 'j':
+         case 'J':
+            return 1;
 
-            case 'n':
-            case 'N':
-               return 0;
+         case 'n':
+         case 'N':
+            return 0;
 
-            default:
-               printErrorMessage(); // Fehlermeldung hinter dem UserInputcursor ausgeben
+         default:
+            printErrorMessage(); // Fehlermeldung hinter dem UserInputcursor ausgeben
          }
       }
-    }while (1);
+   } while (1);
 
    // Wird nie erreicht:
    return 0; // Nur um den Compiler zu beruhigen
@@ -188,12 +188,15 @@ extern short askAgain()
       {
          switch (userInput)
          {
-            case 'j':
-            case 'J':   return 1;
-            case 'n':
-            case 'N':   return 0;
+         case 'j':
+         case 'J':
+            return 1;
+         case 'n':
+         case 'N':
+            return 0;
 
-            default:    break;
+         default:
+            break;
          }
       }
    } while (1);
@@ -204,11 +207,11 @@ extern short askAgain()
 
 extern void clearBuffer()
 {
-	char Dummy;
-	do
-	{
-		scanf("%c", &Dummy);
-	} while (Dummy != '\n');
+   char Dummy;
+   do
+   {
+      scanf("%c", &Dummy);
+   } while (Dummy != '\n');
 
 }
 
@@ -219,31 +222,31 @@ extern void clearScreen()
 
 extern void waitForEnter()
 {
-    char buffer[2];
+   char aBuffer[2];
 
-    printf("\nBitte Eingabetaste (Enter) druecken ...");
-    scanf("%1[^\n]", buffer);
-    clearBuffer();
+   printf("\nBitte Eingabetaste (Enter) druecken ...");
+   scanf("%1[^\n]", aBuffer);
+   clearBuffer();
 }
 
 extern void printLine(char printChar, unsigned long lineLength)
 {
-    unsigned short i;
+   unsigned short i;
 
-    for(i = 0; i < lineLength; i++)
-        printf("%c", printChar);
+   for(i = 0; i < lineLength; i++)
+      printf("%c", printChar);
 
-    printf("\n");
+   printf("\n");
 }
 
 extern short terminateApplication()
 {
-    if(saveTeams("teams.db") == 0)
-        return 0;
-    else
-    {
-        printf("\n Datenbank konnte nicht geschrieben werden! \n");
-        waitForEnter();
-    }
-    return 1;
+   if(saveTeams("teams.db") == 0)
+      return 0;
+   else
+   {
+      printf("\n Datenbank konnte nicht geschrieben werden! \n");
+      waitForEnter();
+   }
+   return 1;
 }
